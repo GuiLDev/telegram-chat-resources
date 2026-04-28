@@ -9,7 +9,7 @@ export async function sendMessage(chatId, text) {
   const response = await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json", // aqui ele vai avisar a API que vamos enviar em formato JSON o nosso metodo
     },
     body: JSON.stringify({
       chat_id: chatId,
