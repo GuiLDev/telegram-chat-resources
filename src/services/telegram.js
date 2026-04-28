@@ -11,6 +11,8 @@ export async function sendMessage(chatId, text) {
     headers: {
       "Content-Type": "application/json", // aqui ele vai avisar a API que vamos enviar em formato JSON o nosso metodo
     },
+    
+    //Essa parte é responsavel por enviar a mensagem diretamente para um chat_id que será identificado em um retorno da API
     body: JSON.stringify({
       chat_id: chatId,
       text,
