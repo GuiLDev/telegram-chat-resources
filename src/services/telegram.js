@@ -1,6 +1,9 @@
+import dotenv from "dotenv";
+
+dotenv.config();
+
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
-
 
 //função pode exportar futuramente com export para outros metodos também
 //o async é uma forma de identificar que a função pode demorar responder
