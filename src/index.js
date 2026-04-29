@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import { sendMessage, setBotCommands } from "./services/telegram.js";
+import {createItem, listItems, updateItem, deleteItem,} from "./controller/itemController.js";
 
 //Essa parte le o .env e configura ele no resto do código
 dotenv.config();
@@ -38,12 +39,24 @@ app.post("/webhook", async (req, res) => {
   console.log(data);
 
   if (data === "create_item") {
-    await sendMessage(chatId, "Você clicou em: Criar item");
-  }
+  const item = createItem("Item de teste");
+  await sendMessage(chatId,`Item criado com sucesso!\n\nID: ${item.id}\nNome: ${item.name}`);
+}
 
   if (data === "list_items") {
-    await sendMessage(chatId, "Você clicou em: Listar itens");
+  const items = listItems();
+
+  if (items.length === 0) {
+    await sendMessage(chatId, "Nenhum item cadastrado.");
+    return res.sendStatus(200);
   }
+
+  const itemsText = items
+    .map((item) => `${item.id} - ${item.name}`)
+    .join("\n");
+
+  await sendMessage(chatId, `Itens cadastrados:\n\n${itemsText}`);
+}
 
   if (data === "update_item") {
     await sendMessage(chatId, "Você clicou em: Atualizar item");
