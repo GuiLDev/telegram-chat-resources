@@ -25,6 +25,37 @@ app.get("/", (req, res) => {
 app.post("/webhook", async (req, res) => {
   const update = req.body;
 
+  //apenas para ver se está chegando a rota
+  console.log("UPDATE COMPLETO:");
+  console.log(JSON.stringify(update, null, 2));
+
+  if (update.callback_query) {
+  const callbackQuery = update.callback_query;
+  const chatId = callbackQuery.message.chat.id;
+  const data = callbackQuery.data;
+
+  console.log("Callback recebido:");
+  console.log(data);
+
+  if (data === "create_item") {
+    await sendMessage(chatId, "Você clicou em: Criar item");
+  }
+
+  if (data === "list_items") {
+    await sendMessage(chatId, "Você clicou em: Listar itens");
+  }
+
+  if (data === "update_item") {
+    await sendMessage(chatId, "Você clicou em: Atualizar item");
+  }
+
+  if (data === "delete_item") {
+    await sendMessage(chatId, "Você clicou em: Deletar item");
+  }
+  return res.sendStatus(200);
+}
+
+
   console.log("Update recebido:");
   console.log(update);
 
