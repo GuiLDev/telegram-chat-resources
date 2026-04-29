@@ -59,8 +59,15 @@ app.post("/webhook", async (req, res) => {
 }
 
   if (data === "update_item") {
-    await sendMessage(chatId, "Você clicou em: Atualizar item");
+  const item = updateItem(1, "Item atualizado");
+
+  if (!item) {
+    await sendMessage(chatId, "Item com ID 1 não encontrado.");
+    return res.sendStatus(200);
   }
+
+    await sendMessage(chatId, `Item atualizado com sucesso!\n\nID: ${item.id}\nNome: ${item.name}`);
+}
 
   if (data === "delete_item") {
     await sendMessage(chatId, "Você clicou em: Deletar item");
