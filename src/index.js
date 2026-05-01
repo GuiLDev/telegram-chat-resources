@@ -70,9 +70,18 @@ app.post("/webhook", async (req, res) => {
 }
 
   if (data === "delete_item") {
-    await sendMessage(chatId, "Você clicou em: Deletar item");
+  const item = deleteItem(1);
+
+  if (!item) {
+    await sendMessage(chatId, "Item com ID 1 não encontrado.");
+    return res.sendStatus(200);
   }
-  return res.sendStatus(200);
+
+  await sendMessage(
+    chatId,
+    `Item deletado com sucesso!\n\nID: ${item.id}\nNome: ${item.name}`
+  );
+}
 }
 
 
