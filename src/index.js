@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { sendMessage, setBotCommands } from "./services/telegram.js";
 import {createItem, listItems, updateItem, deleteItem,} from "./controller/itemController.js";
 import {userStates} from "./data/userStates.js"
+import {setUserState, getUserState, cancelOperation,} from "./controller/stateController.js";
 
 //Essa parte le o .env e configura ele no resto do código
 dotenv.config();
@@ -39,13 +40,15 @@ app.post("/webhook", async (req, res) => {
   console.log("Callback recebido:");
   console.log(data);
 
+
+  //FUNÇÃO DE CREATE DO MENU
   if (data === "create_item") {userStates[chatId] = {action: "creating_service_order",};
 
   await sendMessage(chatId, "Qual a ordem do serviço?");
-
   return res.sendStatus(200);
 }
 
+  //FUNÇÃO DE LISTA DO MENU
   if (data === "list_items") {
   const items = listItems();
 
@@ -61,6 +64,7 @@ app.post("/webhook", async (req, res) => {
   await sendMessage(chatId, `Itens cadastrados:\n\n${itemsText}`);
 }
 
+  //FUNÇÃO DE UPDATE DO MENU
   if (data === "update_item") {
   const item = updateItem(1, "Item atualizado");
 
@@ -72,6 +76,7 @@ app.post("/webhook", async (req, res) => {
     await sendMessage(chatId, `Item atualizado com sucesso!\n\nID: ${item.id}\nNome: ${item.name}`);
 }
 
+  //FUNÇÃO DE DELET DO MENU
   if (data === "delete_item") {
   const item = deleteItem(1);
 
@@ -85,6 +90,14 @@ app.post("/webhook", async (req, res) => {
     `Item deletado com sucesso!\n\nID: ${item.id}\nNome: ${item.name}`
   );
 }
+  //FUNÇÃO DE CANCELAMENTO DA OPERAÇÃO DO MENU
+  if (data === "cancel_menu") {
+  delete userStates[chatId];
+
+  await sendMessage(chatId, "Operação cancelada.");
+
+  return res.sendStatus(200);
+}
 }
 
 
@@ -95,13 +108,22 @@ app.post("/webhook", async (req, res) => {
   const text = message?.text;
   const chatId = message?.chat?.id;
 
+  //BLOCO INICIA O CHAT DE ACORDO COM COMANDO UTILIZADO E DEPOIS TRATADO
   if (text === "/start") {
     await sendMessage(chatId, "Olá! Bot iniciado com sucesso.");
+    return res.sendStatus(200);
   }
 
   if (text === "/help") {
     await sendMessage(chatId, "Comandos disponíveis:\n\n/start - Iniciar o bot\n/help - Ver ajuda\n/menu - Abrir menu principal");
+    return res.sendStatus(200);
   }
+
+  if (text === "/cancel") {
+    delete userStates[chatId];
+    await sendMessage(chatId, "Operação cancelada.");
+  return res.sendStatus(200);
+}
 
   if (text === "/menu") {
   await sendMessage(chatId, "Menu principal:", {
@@ -111,19 +133,28 @@ app.post("/webhook", async (req, res) => {
         [{ text: "Listar itens", callback_data: "list_items" }],
         [{ text: "Atualizar item", callback_data: "update_item" }],
         [{ text: "Deletar item", callback_data: "delete_item" }],
+        [{ text: "Cancelar operação", callback_data: "cancel_menu"}]
       ],
     },
   });
+  return res.sendStatus(200);
 }
 
-  if (userStates[chatId]?.action === "creating_service_order") {
-  const serviceOrder = text;
+  if (text?.startsWith("/")) {
+  await sendMessage(chatId, "Não é permitido utilizar / antes de criar a ordem");
+  return res.sendStatus(200);
+}
+  
+//BLOCO TRATA O CREATE COM UM INPUT E DEPOIS REGISTRA A STRING DO OUTRO LADO
+  if (getUserState(chatId)?.action === "creating_service_order") {
+  const item = createItem(text);
 
-  const item = createItem(serviceOrder);
+  cancelOperation(chatId);
 
-  delete userStates[chatId];
-
-  await sendMessage(chatId,`Ordem de serviço cadastrada com sucesso!\n\nID interno: ${item.id}\nOrdem: ${item.name}`);
+  await sendMessage(
+    chatId,
+    `Ordem de serviço cadastrada com sucesso!\n\nID interno: ${item.id}\nOrdem: ${item.name}`
+  );
 
   return res.sendStatus(200);
 }
