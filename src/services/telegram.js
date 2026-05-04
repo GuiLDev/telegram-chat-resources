@@ -48,8 +48,11 @@ export async function setBotCommands() {
         {
           command: "menu",
           description: "Abrir menu principal",
-          
         },
+        {
+          command: "cancel",
+          description: "Cancelar operação"
+        }
       ],
     }),
   });
